@@ -8,7 +8,7 @@ public class Minibus extends Vehicle implements Rentable {
 
     @Override
     public String getInfo() {
-        return super.getInfo() + " | Accessible: " + (isAccessible ? "Yes" : "No");
+        return super.getInfo() + " Accessible: " + (isAccessible ? "Yes" : "No");
     }
 
     @Override

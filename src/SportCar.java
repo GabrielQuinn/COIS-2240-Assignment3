@@ -10,6 +10,6 @@ public final class SportCar extends Car {
 
     @Override
     public String getInfo() {
-        return super.getInfo() + " | Horsepower: " + horsepower + " | Turbo: " + (hasTurbo ? "Yes" : "No");
+        return super.getInfo() + " Horsepower: " + horsepower + " | Turbo: " + (hasTurbo ? "Yes" : "No");
     }
 }

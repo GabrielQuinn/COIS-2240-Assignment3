@@ -1,0 +1,3 @@
+| GABE | Smokey | Noodles | 20 | Available | Seats: 6
+| SMOKEY | Gabe | Noodles | 2016 | Available | Accessible: Yes
+| NOODLES | Gabe | Smokey | 2016 | Available | Cargo Size: 4.0 | Has Trailer: No

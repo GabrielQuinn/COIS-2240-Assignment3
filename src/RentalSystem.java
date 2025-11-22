@@ -1,6 +1,8 @@
 import java.util.List;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 public class RentalSystem {
     private List<Vehicle> vehicles = new ArrayList<>();
@@ -11,20 +13,54 @@ public class RentalSystem {
     public static RentalSystem getInstance() {
     	return rentalSystem;
     }
+    
+    // Append to given file
+    private void appendToFile(String fileName, String fileContent) {
+    	try {
+    		FileWriter fw = new FileWriter(fileName, true);
+    		BufferedWriter bw = new BufferedWriter(fw);
+        	bw.write(fileContent);
+        	
+        	bw.newLine();
+        	bw.close();
+    	} catch (Exception e) {
+    		System.out.println(e);
+    	}
+    	
+    }
+    
+    public void saveVehicle(Vehicle vehicle) {
+    	appendToFile("vehicles.txt", vehicle.getInfo());
+    }
+    
+    public void saveCustomer(Customer customer) {
+    	appendToFile("customers.txt", customer.toString());
+    }
+    
+    public void saveRecord(RentalRecord record) {
+    	appendToFile("rental_records.txt", record.toString());
+    }
 
     public void addVehicle(Vehicle vehicle) {
         vehicles.add(vehicle);
+        saveVehicle(vehicle); // Save to file
     }
 
     public void addCustomer(Customer customer) {
         customers.add(customer);
+        saveCustomer(customer); // Save to file
     }
 
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.Available) {
             vehicle.setStatus(Vehicle.VehicleStatus.Rented);
-            rentalHistory.addRecord(new RentalRecord(vehicle, customer, date, amount, "RENT"));
+            
+            RentalRecord record = new RentalRecord(vehicle, customer, date, amount, "RENT");
+            
+            rentalHistory.addRecord(record);
             System.out.println("Vehicle rented to " + customer.getCustomerName());
+            
+            saveRecord(record); // Save to file
         }
         else {
             System.out.println("Vehicle is not available for renting.");
@@ -34,8 +70,13 @@ public class RentalSystem {
     public void returnVehicle(Vehicle vehicle, Customer customer, LocalDate date, double extraFees) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.Rented) {
             vehicle.setStatus(Vehicle.VehicleStatus.Available);
-            rentalHistory.addRecord(new RentalRecord(vehicle, customer, date, extraFees, "RETURN"));
+            
+            RentalRecord record = new RentalRecord(vehicle, customer, date, extraFees, "RETURN");
+            
+            rentalHistory.addRecord(record);
             System.out.println("Vehicle returned by " + customer.getCustomerName());
+            
+            saveRecord(record); // Save to file
         }
         else {
             System.out.println("Vehicle is not rented.");
