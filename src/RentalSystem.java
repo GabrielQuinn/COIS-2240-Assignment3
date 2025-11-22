@@ -6,6 +6,11 @@ public class RentalSystem {
     private List<Vehicle> vehicles = new ArrayList<>();
     private List<Customer> customers = new ArrayList<>();
     private RentalHistory rentalHistory = new RentalHistory();
+    private static RentalSystem rentalSystem = new RentalSystem(); // Singleton Design
+    
+    public static RentalSystem getInstance() {
+    	return rentalSystem;
+    }
 
     public void addVehicle(Vehicle vehicle) {
         vehicles.add(vehicle);
