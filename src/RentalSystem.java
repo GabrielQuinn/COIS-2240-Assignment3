@@ -1,17 +1,162 @@
 import java.util.List;
+import java.util.Scanner;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
+import java.io.File;
 
 public class RentalSystem {
     private List<Vehicle> vehicles = new ArrayList<>();
     private List<Customer> customers = new ArrayList<>();
     private RentalHistory rentalHistory = new RentalHistory();
-    private static RentalSystem rentalSystem = new RentalSystem(); // Singleton Design
+    private static RentalSystem rentalSystem; // Singleton Design
+    
+    public RentalSystem() {
+    	loadData();
+    }
     
     public static RentalSystem getInstance() {
-    	return rentalSystem;
+    	if (rentalSystem == null) {
+    		rentalSystem = new RentalSystem();
+        }
+        return rentalSystem;
+    }
+    
+    private void loadData() {
+    	// Loop through all text files and add to vehicle/customer/records
+    	
+    	Scanner readScanner;
+    	
+    	// Vehicles data
+    	try {
+    		File vehicleFile = new File("vehicles.txt");
+        	
+        	readScanner = new Scanner(vehicleFile);
+        	
+        	while (readScanner.hasNext()) {
+				
+				String data = readScanner.nextLine();
+				Vehicle vehicle;
+				
+				// Split data by ","
+				String[] fields = data.split(",");
+				
+				String vehicleType = fields[0];
+				String licensePlate = fields[1];
+				String make = fields[2];
+				String model = fields[3];
+				int year = Integer.parseInt(fields[4]);
+				String status = fields[5];
+				
+				if (vehicleType.equals("Car") == true) {
+					int numSeats = Integer.parseInt(fields[6]);
+					
+					vehicle = new Car(make, model, year, numSeats);
+				} else if (vehicleType.equals("Minibus") == true) {
+					boolean isAccessible = Boolean.parseBoolean(fields[6]);
+					
+					vehicle = new Minibus(make, model, year, isAccessible);
+				} else if (vehicleType.equals("PickupTruck") == true) {
+					double cargoSize = Double.parseDouble(fields[6]);
+					boolean hasTrailer = Boolean.parseBoolean(fields[7]);
+					
+					vehicle = new PickupTruck(make, model, year, cargoSize, hasTrailer);
+				} else continue;
+				
+				vehicle.setLicensePlate(licensePlate);
+				vehicle.setStatus(Vehicle.VehicleStatus.valueOf(status));
+				
+				vehicles.add(vehicle);
+			}
+			
+			readScanner.close();
+			
+    	} catch (Exception e) {
+    		System.out.println(e);
+    	}
+    	
+    	// Customers data
+    	try {
+    		File customerFile = new File("customers.txt");
+        	
+        	readScanner = new Scanner(customerFile);
+        	
+        	while (readScanner.hasNext()) {
+				
+				String data = readScanner.nextLine();
+				Customer customer;
+				
+				// Split data by ","
+				String[] fields = data.split(",");
+				
+				int custId = Integer.parseInt(fields[0]);
+				String custName = fields[1];
+				
+				customer = new Customer(custId, custName);
+				
+				customers.add(customer);
+			}
+			
+			readScanner.close();
+			
+    	} catch (Exception e) {
+    		System.out.println(e);
+    	}
+    	
+    	// Record data
+    	try {
+    		File recordFile = new File("rental_records.txt");
+        	
+        	readScanner = new Scanner(recordFile);
+        	
+        	while (readScanner.hasNext()) {
+				
+				String data = readScanner.nextLine();
+				RentalRecord record;
+				
+				// Split data by ","
+				String[] fields = data.split(",");
+				
+				String licensePlate = fields[0];
+				int custId = Integer.parseInt(fields[1]);
+				LocalDate recordDate = LocalDate.parse(fields[1]);
+				double totalAmount = Double.parseDouble(fields[2]);
+				String recordType = fields[3];
+				
+				Vehicle vehicle = null;
+				Customer customer = null;
+				
+				// Get vehicle
+				for ( int i=0; i<vehicles.size(); i++ ) {
+					Vehicle cur_vehicle = vehicles.get(i);
+					if (cur_vehicle.getLicensePlate().equals(licensePlate)) {
+						vehicle = cur_vehicle;
+					}
+				}
+				
+				// Get customer
+				for ( int i=0; i<customers.size(); i++ ) {
+					Customer cur_customer = customers.get(i);
+					if (cur_customer.getCustomerId() == custId) {
+						customer = cur_customer;
+					}
+				}
+				
+				if (vehicle == null || customer == null) {
+					continue;
+				}
+				
+				record = new RentalRecord(vehicle, customer, recordDate, totalAmount, recordType);
+				
+				rentalHistory.addRecord(record);
+			}
+			
+			readScanner.close();
+			
+    	} catch (Exception e) {
+    		System.out.println(e);
+    	}
     }
     
     // Append to given file
@@ -30,15 +175,29 @@ public class RentalSystem {
     }
     
     public void saveVehicle(Vehicle vehicle) {
-    	appendToFile("vehicles.txt", vehicle.getInfo());
+    	
+    	String appendString = vehicle.getClass().getName() + "," + vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + vehicle.getStatus();
+    	
+    	if (vehicle instanceof Car) {
+    	    appendString += "," + ((Car) vehicle).getNumSeats();
+    	} else if (vehicle instanceof Minibus) {
+    		appendString += "," + ((Minibus) vehicle).getIsAccessible();
+    	} else if (vehicle instanceof PickupTruck) {
+    		appendString += "," + ((PickupTruck) vehicle).getCargoSize() + "," + ((PickupTruck) vehicle).hasTrailer();
+    	} else {
+    		System.out.println("Invalid Class");
+    		return;
+    	}
+    	
+    	appendToFile("vehicles.txt", appendString);
     }
     
     public void saveCustomer(Customer customer) {
-    	appendToFile("customers.txt", customer.toString());
+    	appendToFile("customers.txt", "," + customer.getCustomerId() + "," + customer.getCustomerName());
     }
     
     public void saveRecord(RentalRecord record) {
-    	appendToFile("rental_records.txt", record.toString());
+    	appendToFile("rental_records.txt", "," + record.getVehicle().getLicensePlate() + "," + record.getCustomer().getCustomerId() + "," + record.getRecordDate() + "," + record.getTotalAmount() + "," + record.getRecordType());
     }
 
     public void addVehicle(Vehicle vehicle) {
