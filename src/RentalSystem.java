@@ -200,14 +200,32 @@ public class RentalSystem {
     	appendToFile("rental_records.txt", "," + record.getVehicle().getLicensePlate() + "," + record.getCustomer().getCustomerId() + "," + record.getRecordDate() + "," + record.getTotalAmount() + "," + record.getRecordType());
     }
 
-    public void addVehicle(Vehicle vehicle) {
+    public boolean addVehicle(Vehicle vehicle) {
+    	
+    	for ( int i=0; i<vehicles.size(); i++ ) {
+    		if (vehicles.get(i).getLicensePlate().equals(vehicle.getLicensePlate())) {
+    			System.out.println("Vehicle not added - License plate is taken");
+    			return false;
+    		}
+    	}
+    	
         vehicles.add(vehicle);
         saveVehicle(vehicle); // Save to file
+        return true;
     }
 
-    public void addCustomer(Customer customer) {
+    public boolean addCustomer(Customer customer) {
+    	
+    	for ( int i=0; i<customers.size(); i++ ) {
+    		if (customers.get(i).getCustomerId() == customer.getCustomerId()) {
+    			System.out.println("Customer not added - Customer ID is taken");
+    			return false;
+    		}
+    	}
+    	
         customers.add(customer);
         saveCustomer(customer); // Save to file
+        return true;
     }
 
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
