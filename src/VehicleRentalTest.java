@@ -1,5 +1,7 @@
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +43,35 @@ class VehicleRentalTest {
 		assertThrows(IllegalArgumentException.class, () -> {
 	        car7.setLicensePlate("ZZZ99");
 	    }, "Invalid plate");
+	}
+	
+	@Test
+	void testRentAndReturnVehicle() {
+		Car car = new Car("Toyota", "Carolla", 2025, 4);
+		car.setLicensePlate("AAA111");
+		car.setStatus(Vehicle.VehicleStatus.Available);
+		
+		Customer customer = new Customer(1, "Gabe");
+		
+		assertEquals(car.getStatus(), Vehicle.VehicleStatus.Available);
+		
+		// Rent Vehicle
+		
+		assertTrue(rentalSystem.rentVehicle(car, customer, LocalDate.now(), 10));
+		
+		assertEquals(car.getStatus(), Vehicle.VehicleStatus.Rented);
+		
+		assertFalse(rentalSystem.rentVehicle(car, customer, LocalDate.now(), 10));
+		
+		// Return vehicle
+		
+		assertTrue(rentalSystem.returnVehicle(car, customer, LocalDate.now(), 10));
+		
+		assertEquals(car.getStatus(), Vehicle.VehicleStatus.Available);
+		
+		assertFalse(rentalSystem.returnVehicle(car, customer, LocalDate.now(), 10));
+		
+		
 	}
 
 }
